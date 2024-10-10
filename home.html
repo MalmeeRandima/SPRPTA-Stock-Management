@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory Management</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Bootstrap Icons CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f8f9fa;
+        }
+
+        .table-container {
+            margin: 50px auto;
+            width: 90%;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .table {
+            width: 100%;
+            background: white;
+            border-collapse: collapse;
+        }
+
+        .table thead {
+            background-color: #343a40;
+            color: white;
+        }
+
+        .table th,
+        .table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .table th {
+            font-weight: bold;
+        }
+
+        .table tbody tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        .highlight {
+            color: red;
+            font-weight: bold;
+        }
+
+        .center-text {
+            text-align: center;
+        }
+
+        .quantity-cell {
+            color: #333;
+        }
+
+        .low-stock {
+            background-color: #ffeb3b;
+        }
+
+        .zero-stock {
+            background-color: #f8d7da;
+        }
+
+        .add-item-btn {
+            margin-left: 50px;
+        }
+
+        .modal-header {
+            background-color: #ff7700;
+            color: white;
+        }
+
+        .add-item-btn .btn {
+            background-color: transparent;
+            border: none;
+            color: black;
+            padding: 0;
+        }
+
+        .add-item-btn .btn:hover {
+            color: gray;
+        }
+
+        .add-item-btn .bi {
+            font-size: 4rem;
+        }
+
+        .edit-btn {
+            background: transparent;
+            border: none;
+            color: #007bff; /* Bootstrap primary color */
+            cursor: pointer;
+        }
+
+        .edit-btn:hover {
+            color: darkblue;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h2 class="center-text mb-4">Inventory Dashboard</h2>
+
+        <!-- Add Item Icon -->
+        <div class="text-start add-item-btn">
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addItemModal">
+                <i class="bi bi-plus-square-dotted"></i>
+            </button>
+            <span class="add-item-text"><br>Add Item</span>
+        </div>
+
+        <div class="table-container">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Item Name</th>
+                        <th>Description</th>
+                        <th>Category</th>
+                        <th>Sub-Category</th>
+                        <th>Cost</th>
+                        <th>Retail Price</th>
+                        <th>Wholesale Price</th>
+                        <th>Quantity</th>
+                        <th>Actions</th> <!-- New column for actions -->
+                    </tr>
+                </thead>
+                <tbody id="inventoryTableBody">
+                    <!-- Existing Items -->
+                    <tr>
+                        <td>01 Day Special Permit (p.101.1)</td>
+                        <td></td>
+                        <td>Stationary</td>
+                        <td></td>
+                        <td>1.00 USD</td>
+                        <td>1.00 USD</td>
+                        <td>1.00 USD</td>
+                        <td class="quantity-cell">43</td>
+                        <td><button class="edit-btn" onclick="editItem(this)"><i class="bi bi-pencil-square"></i></button></td>
+                    </tr>
+                    <tr>
+                        <td>CR 03 (Page 120)</td>
+                        <td></td>
+                        <td>Stationary</td>
+                        <td><span class="highlight">Book</span></td>
+                        <td>1.00 USD</td>
+                        <td>1.00 USD</td>
+                        <td>1.00 USD</td>
+                        <td class="quantity-cell low-stock">6</td>
+                        <td><button class="edit-btn" onclick="editItem(this)"><i class="bi bi-pencil-square"></i></button></td>
+                    </tr>
+                    <tr>
+                        <td>CR 06 (Page 240)</td>
+                        <td></td>
+                        <td>Stationary</td>
+                        <td><span class="highlight">Book</span></td>
+                        <td>1.00 USD</td>
+                        <td>1.00 USD</td>
+                        <td>1.00 USD</td>
+                        <td class="quantity-cell zero-stock">0</td>
+                        <td><button class="edit-btn" onclick="editItem(this)"><i class="bi bi-pencil-square"></i></button></td>
+                    </tr>
+                    <tr>
+                        <td>Canon 325 Toner</td>
+                        <td></td>
+                        <td>Machine Items</td>
+                        <td></td>
+                        <td>1.00 USD</td>
+                        <td>1.00 USD</td>
+                        <td>1.00 USD</td>
+                        <td class="quantity-cell">3</td>
+                        <td><button class="edit-btn" onclick="editItem(this)"><i class="bi bi-pencil-square"></i></button></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Add Item Modal -->
+    <div class="modal fade" id="addItemModal" tabindex="-1" aria-labelledby="addItemModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addItemModalLabel">Add New Item</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addItemForm">
+                        <div class="mb-3">
+                            <label for="itemName" class="form-label">Item Name</label>
+                            <input type="text" class="form-control" id="itemName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="itemDescription" class="form-label">Description</label>
+                            <input type="text" class="form-control" id="itemDescription">
+                        </div>
+                        <div class="mb-3">
+                            <label for="itemCategory" class="form-label">Category</label>
+                            <input type="text" class="form-control" id="itemCategory" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="itemSubCategory" class="form-label">Sub-Category</label>
+                            <input type="text" class="form-control" id="itemSubCategory">
+                        </div>
+                        <div class="mb-3">
+                            <label for="itemCost" class="form-label">Cost</label>
+                            <input type="number" class="form-control" id="itemCost" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="itemRetailPrice" class="form-label">Retail Price</label>
+                            <input type="number" class="form-control" id="itemRetailPrice" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="itemWholesalePrice" class="form-label">Wholesale Price</label>
+                            <input type="number" class="form-control" id="itemWholesalePrice" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="itemQuantity" class="form-label">Quantity</label>
+                            <input type="number" class="form-control" id="itemQuantity" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Add Item</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Item Modal -->
+    <div class="modal fade" id="editItemModal" tabindex="-1" aria-labelledby="editItemModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editItemModalLabel">Edit Item</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editItemForm">
+                        <div class="mb-3">
+                            <label for="editItemName" class="form-label">Item Name</label>
+                            <input type="text" class="form-control" id="editItemName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editItemDescription" class="form-label">Description</label>
+                            <input type="text" class="form-control" id="editItemDescription">
+                        </div>
+                        <div class="mb-3">
+                            <label for="editItemCategory" class="form-label">Category</label>
+                            <input type="text" class="form-control" id="editItemCategory" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editItemSubCategory" class="form-label">Sub-Category</label>
+                            <input type="text" class="form-control" id="editItemSubCategory">
+                        </div>
+                        <div class="mb-3">
+                            <label for="editItemCost" class="form-label">Cost</label>
+                            <input type="number" class="form-control" id="editItemCost" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editItemRetailPrice" class="form-label">Retail Price</label>
+                            <input type="number" class="form-control" id="editItemRetailPrice" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editItemWholesalePrice" class="form-label">Wholesale Price</label>
+                            <input type="number" class="form-control" id="editItemWholesalePrice" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editItemQuantity" class="form-label">Quantity</label>
+                            <input type="number" class="form-control" id="editItemQuantity" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Update Item</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
+
+    <script>
+        class InventoryManager {
+            constructor() {
+                this.inventoryTableBody = document.getElementById('inventoryTableBody');
+            }
+
+            addItem(event) {
+                event.preventDefault(); // Prevent form submission
+
+                const itemName = document.getElementById('itemName').value;
+                const itemDescription = document.getElementById('itemDescription').value;
+                const itemCategory = document.getElementById('itemCategory').value;
+                const itemSubCategory = document.getElementById('itemSubCategory').value;
+                const itemCost = document.getElementById('itemCost').value;
+                const itemRetailPrice = document.getElementById('itemRetailPrice').value;
+                const itemWholesalePrice = document.getElementById('itemWholesalePrice').value;
+                const itemQuantity = document.getElementById('itemQuantity').value;
+
+                const newRow = this.inventoryTableBody.insertRow();
+
+                newRow.innerHTML = `
+                    <td>${itemName}</td>
+                    <td>${itemDescription}</td>
+                    <td>${itemCategory}</td>
+                    <td>${itemSubCategory}</td>
+                    <td>${itemCost} USD</td>
+                    <td>${itemRetailPrice} USD</td>
+                    <td>${itemWholesalePrice} USD</td>
+                    <td class="quantity-cell">${itemQuantity}</td>
+                    <td><button class="edit-btn" onclick="editItem(this)"><i class="bi bi-pencil-square"></i></button></td>
+                `;
+
+                // Reset the form
+                document.getElementById('addItemForm').reset();
+                // Close the modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById('addItemModal'));
+                modal.hide();
+            }
+
+            updateItem(row, itemName, itemDescription, itemCategory, itemSubCategory, itemCost, itemRetailPrice, itemWholesalePrice, itemQuantity) {
+                row.cells[0].innerText = itemName;
+                row.cells[1].innerText = itemDescription;
+                row.cells[2].innerText = itemCategory;
+                row.cells[3].innerText = itemSubCategory;
+                row.cells[4].innerText = itemCost + " USD";
+                row.cells[5].innerText = itemRetailPrice + " USD";
+                row.cells[6].innerText = itemWholesalePrice + " USD";
+                row.cells[7].innerText = itemQuantity;
+
+                // Close the edit modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById('editItemModal'));
+                modal.hide();
+            }
+        }
+
+        // Initialize InventoryManager
+        const inventoryManager = new InventoryManager();
+
+        // Add event listener for the add item form submission
+        document.getElementById('addItemForm').addEventListener('submit', (event) => {
+            inventoryManager.addItem(event);
+        });
+
+        // Function to handle editing an item
+        function editItem(button) {
+            const row = button.closest('tr');
+            const itemName = row.cells[0].innerText;
+            const itemDescription = row.cells[1].innerText;
+            const itemCategory = row.cells[2].innerText;
+            const itemSubCategory = row.cells[3].innerText;
+            const itemCost = row.cells[4].innerText;
+            const itemRetailPrice = row.cells[5].innerText;
+            const itemWholesalePrice = row.cells[6].innerText;
+            const itemQuantity = row.cells[7].innerText;
+
+            // Populate the edit form with current item data
+            document.getElementById('editItemName').value = itemName;
+            document.getElementById('editItemDescription').value = itemDescription;
+            document.getElementById('editItemCategory').value = itemCategory;
+            document.getElementById('editItemSubCategory').value = itemSubCategory;
+            document.getElementById('editItemCost').value = itemCost.replace(' USD', '');
+            document.getElementById('editItemRetailPrice').value = itemRetailPrice.replace(' USD', '');
+            document.getElementById('editItemWholesalePrice').value = itemWholesalePrice.replace(' USD', '');
+            document.getElementById('editItemQuantity').value = itemQuantity;
+
+            // Show the edit modal
+            const editModal = new bootstrap.Modal(document.getElementById('editItemModal'));
+            editModal.show();
+
+            // Handle form submission for updating item
+            document.getElementById('editItemForm').onsubmit = function (event) {
+                event.preventDefault(); // Prevent form submission
+
+                const updatedItemName = document.getElementById('editItemName').value;
+                const updatedItemDescription = document.getElementById('editItemDescription').value;
+                const updatedItemCategory = document.getElementById('editItemCategory').value;
+                const updatedItemSubCategory = document.getElementById('editItemSubCategory').value;
+                const updatedItemCost = document.getElementById('editItemCost').value;
+                const updatedItemRetailPrice = document.getElementById('editItemRetailPrice').value;
+                const updatedItemWholesalePrice = document.getElementById('editItemWholesalePrice').value;
+                const updatedItemQuantity = document.getElementById('editItemQuantity').value;
+
+                // Update the row with new data
+                inventoryManager.updateItem(row, updatedItemName, updatedItemDescription, updatedItemCategory, updatedItemSubCategory, updatedItemCost, updatedItemRetailPrice, updatedItemWholesalePrice, updatedItemQuantity);
+            };
+        }
+    </script>
+</body>
+
+</html>
