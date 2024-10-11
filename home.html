@@ -9,8 +9,10 @@
     <title>Inventory Management</title>
     <style>
         h1 {
-            text-align: center; /* Center the title */
-            font-weight: bold; /* Make the title bold */
+            text-align: center;
+            /* Center the title */
+            font-weight: bold;
+            /* Make the title bold */
         }
     </style>
 </head>
@@ -21,6 +23,18 @@
         <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addItemModal">
             <i class="bi bi-plus-square-dotted"></i> Add Item
         </button>
+
+        <!-- Search Bar with Dropdown -->
+        <div class="mt-3">
+            <select id="categorySearch" class="form-select" onchange="filterTable()">
+                <option value="">Select a category...</option>
+                <option value="All">All</option>
+                <option value="Machine Items">Machine Items</option>
+                <option value="Non Stationary">Non Stationary</option>
+                <option value="Stationary">Stationary</option>
+            </select>
+        </div>
+
         <table class="table mt-3">
             <thead>
                 <tr>
@@ -76,7 +90,6 @@
                             <label for="itemCategory" class="form-label">Category</label>
                             <select class="form-select" id="itemCategory" required>
                                 <option value="">Select Category</option>
-                                
                                 <option value="Machine Items">Machine Items</option>
                                 <option value="Non Stationary">Non Stationary</option>
                                 <option value="Stationary">Stationary</option>
@@ -131,7 +144,6 @@
                             <label for="editItemCategory" class="form-label">Category</label>
                             <select class="form-select" id="editItemCategory" required>
                                 <option value="">Select Category</option>
-                                
                                 <option value="Machine Items">Machine Items</option>
                                 <option value="Non Stationary">Non Stationary</option>
                                 <option value="Stationary">Stationary</option>
@@ -198,51 +210,70 @@
                 </td>
             `;
 
-            // Clear the form
+            // Clear input fields
             document.getElementById('addItemForm').reset();
-
-            // Close the modal
-            const addItemModal = bootstrap.Modal.getInstance(document.getElementById('addItemModal'));
-            addItemModal.hide();
+            // Close modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('addItemModal'));
+            modal.hide();
         };
 
-        // Edit item in inventory
-        function editItem(button) {
-            const row = button.closest('tr');
-            const cells = row.getElementsByTagName('td');
+        // Filter table
+        function filterTable() {
+            const selectedCategory = document.getElementById('categorySearch').value;
+            const rows = inventoryTableBody.getElementsByTagName('tr');
 
-            document.getElementById('editItemName').value = cells[0].innerText;
-            document.getElementById('editItemDescription').value = cells[1].innerText;
-            document.getElementById('editItemCategory').value = cells[2].innerText;
-            document.getElementById('editItemSubCategory').value = cells[3].innerText;
-            document.getElementById('editItemCost').value = parseFloat(cells[4].innerText.replace('Rs. ', ''));
-            document.getElementById('editItemRetailPrice').value = parseFloat(cells[5].innerText.replace('Rs. ', ''));
-            document.getElementById('editItemWholesalePrice').value = parseFloat(cells[6].innerText.replace('Rs. ', ''));
-            document.getElementById('editItemQuantity').value = parseInt(cells[7].innerText);
+            for (let i = 0; i < rows.length; i++) {
+                const categoryCell = rows[i].getElementsByTagName('td')[2]; // Category column
+                if (categoryCell) {
+                    const categoryValue = categoryCell.textContent;
 
-            // Set up form submission to update the row
-            document.getElementById('editItemForm').onsubmit = function (event) {
-                event.preventDefault();
-
-                cells[0].innerText = document.getElementById('editItemName').value;
-                cells[1].innerText = document.getElementById('editItemDescription').value;
-                cells[2].innerText = document.getElementById('editItemCategory').value;
-                cells[3].innerText = document.getElementById('editItemSubCategory').value;
-                cells[4].innerText = `Rs. ${document.getElementById('editItemCost').value}`;
-                cells[5].innerText = `Rs. ${document.getElementById('editItemRetailPrice').value}`;
-                cells[6].innerText = `Rs. ${document.getElementById('editItemWholesalePrice').value}`;
-                cells[7].innerText = document.getElementById('editItemQuantity').value;
-
-                const editItemModal = bootstrap.Modal.getInstance(document.getElementById('editItemModal'));
-                editItemModal.hide();
-            };
-
-            // Show the edit modal
-            const editItemModal = new bootstrap.Modal(document.getElementById('editItemModal'));
-            editItemModal.show();
+                    // Show all items if "All" is selected
+                    if (selectedCategory === "All") {
+                        rows[i].style.display = '';
+                    } else {
+                        rows[i].style.display = selectedCategory === '' || categoryValue === selectedCategory ? '' : 'none';
+                    }
+                }
+            }
         }
 
-        // Delete item from inventory
+        // Edit item
+        function editItem(button) {
+            const row = button.closest('tr');
+            const itemCells = row.getElementsByTagName('td');
+
+            document.getElementById('editItemName').value = itemCells[0].textContent;
+            document.getElementById('editItemDescription').value = itemCells[1].textContent;
+            document.getElementById('editItemCategory').value = itemCells[2].textContent;
+            document.getElementById('editItemSubCategory').value = itemCells[3].textContent;
+            document.getElementById('editItemCost').value = itemCells[4].textContent.replace('Rs. ', '');
+            document.getElementById('editItemRetailPrice').value = itemCells[5].textContent.replace('Rs. ', '');
+            document.getElementById('editItemWholesalePrice').value = itemCells[6].textContent.replace('Rs. ', '');
+            document.getElementById('editItemQuantity').value = itemCells[7].textContent;
+
+            const editModal = new bootstrap.Modal(document.getElementById('editItemModal'));
+            editModal.show();
+
+            document.getElementById('editItemForm').onsubmit = function (event) {
+                event.preventDefault();
+                // Update the row data with new values
+                itemCells[0].textContent = document.getElementById('editItemName').value;
+                itemCells[1].textContent = document.getElementById('editItemDescription').value;
+                itemCells[2].textContent = document.getElementById('editItemCategory').value;
+                itemCells[3].textContent = document.getElementById('editItemSubCategory').value;
+                itemCells[4].textContent = 'Rs. ' + document.getElementById('editItemCost').value;
+                itemCells[5].textContent = 'Rs. ' + document.getElementById('editItemRetailPrice').value;
+                itemCells[6].textContent = 'Rs. ' + document.getElementById('editItemWholesalePrice').value;
+                itemCells[7].textContent = document.getElementById('editItemQuantity').value;
+
+                // Clear input fields
+                document.getElementById('editItemForm').reset();
+                // Close modal
+                editModal.hide();
+            };
+        }
+
+        // Delete item
         function deleteItem(button) {
             if (confirm('Are you sure you want to delete this item?')) {
                 const row = button.closest('tr');
@@ -250,7 +281,6 @@
             }
         }
     </script>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
